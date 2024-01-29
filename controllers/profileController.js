@@ -1,4 +1,4 @@
-const PROFILE = require("../modals/profile");
+const PROFILE = require("../models/profile");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 

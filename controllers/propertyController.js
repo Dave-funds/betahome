@@ -86,8 +86,10 @@ const handleAddProperty = async (req, res) => {
 };
 
 const handleGetAllProperties = async (req, res) => {
-  const { location, type, bedroom, title } = req.query
+  const { location, type, bedroom, sort } = req.query
+  
   const queryObject = {}
+  let result = Property.find(queryObject)
   if (location) {
     queryObject.location = { $regex: location, $options: "i"}
   }
@@ -95,10 +97,16 @@ const handleGetAllProperties = async (req, res) => {
     queryObject.propertyType = {regex: type, $options: "i"}
   }
   if (bedroom) {
-    queryObject.bedroom = { $eq: Number(bedroom) }
+    queryObject.bedroom = { $eq: bedroom}
   }
+  if(sort){
+    result = result.sort(`${sort} -createdAt`)
+  } else {
+    result.sort(` -createdAt`)
+  }
+  result = result.find(queryObject)
   try {
-    const properties = await Property.find().sort("-createdAt");
+    const properties = await result
     res.status(200).json({ success: true, properties });
   } catch (error) {
     console.log(error);
@@ -256,11 +264,11 @@ const handleDeleteProperty = async (req, res) => {
 
 const handleFeaturedProperties = async (req, res) => {
   try {
-    const housedProperties = await Property.findOne({ propertyType: 'house' }).limit(3)
-    const landedProperties = await Property.findOne({ propertyType: 'landed'}).limit(3)
+    const housedProperties = await Property.findOne({ propertyType: 'house' }).sort('-createdAt').limit(3)
+    const landedProperties = await Property.findOne({ propertyType: 'landed'}).sort('-createdAt').limit(3)
 
-    const properties = [...housedProperties, ...landedProperties]
-    res.status(200).json({ success: true, properties})
+    const featuredProperties = [...housedProperties, ...landedProperties]
+    res.status(200).json({ success: true, featuredProperties})
   } catch (error) {
     console.log(error);
     res.json(error);
